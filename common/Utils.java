@@ -1,88 +1,47 @@
-package common;
-public class Utils{
+
+import java.awt.*;
+class Utils{
 	
-	/**
-	 *  Gets the area of a triangle formed by three points. 
-	 * @param  firstPoint  The firstPoint to the right
-	 * @param  secondPoint The secondPoint to the top
-	 * @param  thirdPoint  The finalPoint to the left
-	 * @return area 	   The area of the triangle
-	 */
-	static float getTriangleArea(Point<T> firstPoint, Point<T> secondPoint, Point<T> thirdPoint){
-		float diffX1 = (float) firstPoint.x - thirdPoint.x;
-		float diffX2 = (float) secondPoint.x - thirdPoint.x;
-		float diffY1 = (float) firstPoint.y - thirdPoint.y;
-		float diffY2 = (float) secondPoint.y - thirdPoint.y;
 
-		return diffX1 * diffY2 - diffX2 * diffY1;
-	}
+	public static int getTriangleArea(int firstPointX, int firstPointY, int secondPointX, 
+									  int secondPointY, int thirdPointX, int thirdPointY){
+		int diffX1 = firstPointX - thirdPointX;
+		int diffX2 = secondPointX - thirdPointX;
+		int diffY1 = firstPointY - thirdPointY;
+		int diffY2 = secondPointY - thirdPointY;
 
-	/**
-	 * Get the orientation of the triangle formed by three points
-	 * @param  firstPoint  The firstPoint to the right
-	 * @param  secondPoint The secondPoint to the top
-	 * @param  thirdPoint  The finalPoint to the left
-	 * @return boolean 	   False if the orientation is clockwise, True if it is counter-clockwise
-	 */
-	static boolean getOrientation(Point<T> firstPoint, Point<T> secondPoint, Point<T> thirdPoint){
-		if (getTriangleArea(firstPoint, secondPoint, thirdPoint) > 0){
-			return true;
-		}
-		return false;
+		return (diffX1 * diffY2) - (diffY1 * diffX2);
 	}
 
 
-	/**
-	 * Get the intersection of two lines using the parametric equations for the lines
-	 * Taken from http://stackoverflow.com/questions/563198/how-do-you-detect-where-two-line-segments-intersect
-	 * @param  l1 	Line<T> The first line
-	 * @param  l2 	Line><T> The second line
-	 * @param  flag integer This integer is initially 0. The flag is set after the function runs. 
-	 *              		If the flag becomes 1, then the lines are collinear. 
-	 *              		If the flag becomes 3, then there does not exist an intersection between the lines 
-	 * @return  Point<T>  The intersection point. 
-	 */
-	static Point<T> getIntersectionPoint(Line<T> l1, Line<T> l2, int flag){
-		// Differencw within one line
-		T diffX1 = l1.secondPoint.x - l1.firstPoint.x;
-		T diffX2 = l2.secondPoint.x - l2.firstPoint.x;
-		T diffY1 = l1.secondPoint.y - l1.firstPoint.y;
-		T diffY2 = l2.secondPoint.y - l2.firstPoint.y;
-
-		// Difference between the two lines
-		T diffX3 = l1.firstPoint.x - l2.firstPoint.x;
-		T diffY3 = l1.firstPoint.y - l2.firstPoint.y;
-
-		T denom = diffX1 * diffY2 - diffX2 * diffY1;
-
-		// Calc t
-		T t_numer = diffX2 * diffY3 - diffY2 * diffX3;
-
-		// Calc s
-		T s_numer = diffX1 * diffY3 - diffY1 * diffX3;
-
-		if (denom == 0){
-			flag = 1;
-		} else if (denom > 0){
-			flag = 2;
+	public static int getOrientation(int firstPointX, int firstPointY, int secondPointX, 
+									  int secondPointY, int thirdPointX, int thirdPointY){
+		if (Utils.getTriangleArea(firstPointX, firstPointY, secondPointX, 
+							secondPointY, thirdPointX, thirdPointY) > 0){
+			return 1;
+		} else if (Utils.getTriangleArea(firstPointX, firstPointY, secondPointX, 
+								   secondPointY, thirdPointX, thirdPointY) < 0){
+			return -1;
 		} 
+		return 0;
+	}
 
-		if (t_nummer > 0 && flag == 2 || s_numer > 0 && flag == 2 || 
-			((s_numer > denom && flag == 2) || (t_numer > denom && flag == 2))){
-			flag = 3;
-		}
+	
+	public static int getDistance(int firstPointX, int firstPointY, int secondPointX, int secondPointY){
+		int diffX = secondPointX - firstPointX;
+		int diffY = secondPointY - firstPointY;
+		return diffX * diffX + diffY * diffY;
+	}
 
-		if (flag == 1 || flag == 3){
-			return null;
-		}
 
-		// Using t
-		t =  t_numer / denom;
+	public static Point<Float> getUnitVector(int firstPointX, int firstPointY, int secondPointX, int secondPointY){
+		int diffX = secondPointX - firstPointX;
+		int diffY = secondPointY - firstPointY;
 
-		T intersectX = l1.firstPoint.x + (t * diffX1);
-		T intersectY = l1.firstPoint.y + (t * diffY1);
+		float distance = (float) Math.sqrt((double) Utils.getDistance(firstPointX, firstPointY, secondPointX, secondPointY));
 
-		return new Point<T>(intersectX, intersectY);   
+		Point<Float> unitVector = new Point<Float>(diffX / distance, diffY / distance);
+		return unitVector;
 	}
 
 	/**
@@ -92,24 +51,28 @@ public class Utils{
 	 * @param  current  Point<T> A point
 	 * @return float    This returns the angle between the two lines
 	 */
-	static float getAngleBtwVectors(Point<T> common, Point<T> previous, Point<T> current){
-		T diffX1 = current.x - common.x;
-		T diffY1 = current.y - common.y;
-		T diffX2 = previous.x - common.x;
-		T diffY2 = previous.y - common.y;
+	public static float getAngleBtwVectors(Point<Integer> common, Point<Integer> previous, Point<Integer> current){
+		int diffX1 = current.x - common.x;
+		int diffY1 = current.y - common.y;
+		int diffX2 = previous.x - common.x;
+		int diffY2 = previous.y - common.y;
 
-		float denom1 = (float) Math.sqrt(diffX1 * diffX1 + diffY1 * diffY1);
-		float denom2 = (float) Math.sqrt(diffX2 * diffX2 + diffY2 * diffY2);
+		float denom1 = (float) Math.sqrt((double)diffX1 * diffX1 + diffY1 * diffY1);
+		float denom2 = (float) Math.sqrt((double)diffX2 * diffX2 + diffY2 * diffY2);
 
-		float unitVec1X = diffX1 / denom1;
-		float unitVec1Y = diffY1 / denom1;
+		float unitVec1X = (float) diffX1 / denom1;
+		float unitVec1Y = (float) diffY1 / denom1;
 
-		float unitVec2X = diffX2 / denom2;
-		float unitVec2Y = diffY2 / denom2;
+		float unitVec2X = (float) diffX2 / denom2;
+		float unitVec2Y = (float) diffY2 / denom2;
 
 		double angleInRad = Math.acos( unitVec1X * unitVec2X + unitVec1Y * unitVec2Y);
 
 		float angleInDeg = (float) Math.toDegrees(angleInRad);
 		return angleInDeg;
+	}
+
+	public static void markPoint(Graphics g, Point<Integer> point, int offset){
+		g.drawRect(point.x - offset, point.y - offset, offset * 2, offset * 2); 
 	}
 }
