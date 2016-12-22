@@ -1,3 +1,4 @@
+package common;
 public class Point3D<T> extends Point<T>{
 	public T z;
 

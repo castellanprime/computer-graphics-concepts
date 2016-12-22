@@ -1,3 +1,4 @@
+package common;
 public class Point<T>{
 	public T x, T y;
 
