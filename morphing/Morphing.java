@@ -42,13 +42,10 @@ class PolygonMorph extends Canvas{
 
 	private ArrayList<Point<Integer>> sourcePolyPoints = new ArrayList<>();
 	private ArrayList<Point<Integer>> targetPolyPoints = new ArrayList<>();
-	private SortedMap<Double, Point<Integer>> anglePoints = new TreeMap<>();
-	private LinkedHashMap<Point<Integer>, Point<Integer>> correspondList = new LinkedHashMap<>();
+	
 
 	//private ArrayList<Line2D> sourcePolyLines = new ArrayList<>();
 	//private ArrayList<Line2D> targetPolyLines = new ArrayList<>();
-
-	private Polygon targetPolygon;
 
 	private int polyOrientation;
 
@@ -122,10 +119,6 @@ class PolygonMorph extends Canvas{
 								targetPolyPoints.add(currentPoint);
 							} else {
 								isTargetPolyComplete = true;
-								targetPolygon = new Polygon();
-								for (Point<Integer> point: targetPolyPoints){
-									targetPolygon.addPoint(point.x, point.y);
-								}
 							}
 						} else {
 							System.out.println("Ignore the point clicked");
@@ -225,6 +218,42 @@ class PolygonMorph extends Canvas{
 
 			drawUserPolygon(g, targetPolyPoints, isTargetPolyComplete, Color.blue);
 			status.setText("Target polyon has translated and is shown in blue");
+
+			// Sort the points in the polygon
+			Point<Integer> refpoint = new Point<Integer>(sourcePolyCenter.x + 20, sourcePolyCenter.y);
+
+			SortedMap<Double, Point<Integer>> sourceAnglePoints = new TreeMap<>();
+			SortedMap<Double, Point<Integer>> targetAnglePoints = new TreeMap<>();
+
+			for (Point<Integer> point: sourcePolyPoints){
+				double angle = Utils.getPointAngleWithXAxis(point, refpoint, polyOrientation);
+				sourceAnglePoints.put(angle, point);
+			}
+
+			for (Point<Integer> point: targetPolyPoints){
+				double angle = Utils.getPointAngleWithXAxis(point, refpoint, polyOrientation);
+				targetAnglePoints.put(angle, point);
+			}			
+
+			ArrayList<Point<Integer>> sortedSourcePolyPoints = new ArrayList<>();
+			ArrayList<Point<Integer>> sortedTargetPolyPoints = new ArrayList<>();
+
+			for (Map.Entry<Double, Point<Integer>> entry: sourceAnglePoints.entrySet()){
+				sortedSourcePolyPoints.add(entry.getValue());
+			}
+
+			for (Map.Entry<Double, Point<Integer>> entry: targetAnglePoints.entrySet()){
+				sortedTargetPolyPoints.add(entry.getValue());
+			}
+
+			// Find the corresponding points
+			CorrPoints corrPoints = new CorrPoints(sortedSourcePolyPoints, 
+												   sortedTargetPolyPoints,
+												   sourcePolyCenter,
+												   targetPolyCenter);
+
+
+
 		}
 
 	}

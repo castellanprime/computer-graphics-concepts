@@ -88,4 +88,20 @@ class Utils{
 
 		return new Point<Integer>(Math.round(newX), Math.round(newY));
 	}
+
+	private static double getPointAngleWithXAxis(Point<Integer> firstPoint, Point<Integer> refPoint, int orientation){
+		double result = 0.0;
+		if (orientation == -1){		// this is CCW
+			result = Math.atan2(firstPoint.y - refPoint.y, firstPoint.x - refPoint.x);
+		} else if (orientation == 1){	// this is CW
+			result = Math.atan2(firstPoint.x - refPoint.x, firstPoint.y - refPoint.y);
+		}
+
+		double angle = Math.toDegrees(result);
+
+		if (angle < 0){
+			angle += 360;
+		}
+		return angle;
+	}
 }
