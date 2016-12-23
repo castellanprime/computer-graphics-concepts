@@ -38,7 +38,7 @@ class PolygonMorph extends Canvas{
 	private boolean isSourcePolyComplete = false;
 	private boolean isTargetPolyComplete = false;
 	
-	private boolean morphBegin = false;
+	private boolean morphBegin = false, hasTranslated = false;
 
 	private ArrayList<Point<Integer>> sourcePolyPoints = new ArrayList<>();
 	private ArrayList<Point<Integer>> targetPolyPoints = new ArrayList<>();
@@ -199,8 +199,33 @@ class PolygonMorph extends Canvas{
 
 		// Draw targetPolygon
 		if (targetPolyPoints.isEmpty()) return;
-		drawUserPolygon(g, targetPolyPoints, isTargetPolyComplete, Color.magenta);
+		if (hasTranslated == false){
+			drawUserPolygon(g, targetPolyPoints, isTargetPolyComplete, Color.magenta);
+		}
 		drawUserGuideLines(g, targetPolyPoints, isTargetPolyComplete, targetPolyCenter);
+
+		if (isSourcePolyComplete == true && isTargetPolyComplete == true){
+			status.setText("Polygons drawn");
+			// Translate the targetPolygon so that the centers of the two polygons will align
+			if (hasTranslated == false){
+				int xOffset = targetPolyCenter.x - sourcePolyCenter.x;
+				int yOffset = targetPolyCenter.y - sourcePolyCenter.y;
+
+				Transformation transform = new Transformation("translate", "inverse", 0, xOffset, yOffset);
+
+				for (int i = 0; i < targetPolyPoints.size(); i++){
+					Point<Integer> point = Utils.translate(transform, targetPolyPoints.get(i));
+					targetPolyPoints.set(i, point);
+				}
+
+				targetPolyCenter = Utils.translate(transform, targetPolyCenter);
+				hasTranslated = true;
+				repaint();
+			}
+
+			drawUserPolygon(g, targetPolyPoints, isTargetPolyComplete, Color.blue);
+			status.setText("Target polyon has translated and is shown in blue");
+		}
 
 	}
 }

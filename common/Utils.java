@@ -75,4 +75,17 @@ class Utils{
 	public static void markPoint(Graphics g, Point<Integer> point, int offset){
 		g.drawRect(point.x - offset, point.y - offset, offset * 2, offset * 2); 
 	}
+
+	public static Point<Integer> translate(Transformation transform, Point<Integer> point){
+		float [][] mat = transform.kernel;
+
+		float firstCol = mat[0][0] * point.x + mat[1][0] * point.y + mat[2][0];
+		float secondCol = mat[0][1] * point.x + mat[1][1] * point.y + mat[2][1];
+		float thirdCol = mat[0][2] * point.x + mat[1][2] * point.y + mat[2][2];
+
+		float newX = firstCol / thirdCol;
+		float newY = secondCol / thirdCol;
+
+		return new Point<Integer>(Math.round(newX), Math.round(newY));
+	}
 }
