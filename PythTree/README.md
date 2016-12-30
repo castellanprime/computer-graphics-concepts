@@ -12,7 +12,7 @@ where limit-BFS must be integers.
 
 ### Output 
 
-![alt text](output_images/pythTree.gif "Pythagorean Tree output")
+![alt text](../output_images/pythTree.gif "Pythagorean Tree output")
 
 ### Caveat
 
