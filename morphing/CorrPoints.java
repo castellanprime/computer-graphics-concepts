@@ -8,6 +8,7 @@ public class CorrPoints{
 	private ArrayList<Point<Integer>> sourcePoly, targetPoly;
 	private Point<Integer> sourePolyCenter, targetPolyCenter, firstPoint, secondPoint;
 	private LinkedHashMap<Point<Integer> , Point<Integer>> correspondList = new LinkedHashMap<>();
+	private LinkedHashMap<Integer, ArrayList<Point<Integer>>> morphPoints = new LinkedHashMap<>();
 	private final int eps = 15;
 
 	CorrPoints(ArrayList<Point<Integer>> sourcePoly, ArrayList<Point<Integer>> targetPoly, 
@@ -18,7 +19,7 @@ public class CorrPoints{
 		this.targetPolyCenter = targetPolyCenter;
 	}
 
-	public void findCorrespondingPoints(){
+	public LinkedHashMap<Point<Integer> , Point<Integer>> findCorrespondingPoints(){
 		int sourceIndex = 0, targetIndex = 0;
 		Point<Integer> refPoint = new Point<Integer>(sourePolyCenter.x + 20, sourePolyCenter.y);
 
@@ -27,12 +28,12 @@ public class CorrPoints{
 
 		while (sourceIndex < sourceSize  && targetIndex < targetSize){
 
-			sourcePoint = sourcePoly.get(sourceIndex);
-			targetPoint = targetPoly.get(targetIndex);
+			Point<Integer> sourcePoint = sourcePoly.get(sourceIndex);
+			Point<Integer> targetPoint = targetPoly.get(targetIndex);
 
 			// Instead of using the sine we use the angle itself
-			sourceAngle = Utils.getAngleBtwVectors(sourePolyCenter, refPoint, sourcePoint);
-			targetAngle = Utils.getAngleBtwVectors(sourePolyCenter, refPoint, targetPoint);
+			float sourceAngle = Utils.getAngleBtwVectors(sourePolyCenter, refPoint, sourcePoint);
+			float targetAngle = Utils.getAngleBtwVectors(sourePolyCenter, refPoint, targetPoint);
 
 			if (Math.abs(sourceAngle - targetAngle) < eps){
 				refPoint = sourcePoly.get(sourceIndex);
@@ -86,7 +87,7 @@ public class CorrPoints{
 			firstPoint = targetPoly.get(targetIndex);
 			Line line1 = new Line(sourePolyCenter, firstPoint);
 			Line line2 = new Line(refPoint, sourcePoly.get(0));
-			secondPoint = line1.getIntersectionPointWith(l2, 0);
+			secondPoint = line1.getIntersectionPointWith(line2, 0);
 			this.correspondList.put(secondPoint, firstPoint);
 			targetIndex++;
 		}
@@ -95,13 +96,35 @@ public class CorrPoints{
 			firstPoint = sourcePoly.get(sourceIndex);
 			Line line1 = new Line(sourePolyCenter, firstPoint);
 			Line line2 = new Line(refPoint, targetPoly.get(0));
-			secondPoint = line1.getIntersectionPointWith(l2, 0);
+			secondPoint = line1.getIntersectionPointWith(line2, 0);
 			this.correspondList.put(secondPoint, firstPoint);
 			sourceIndex++;
 		}
+
+		return this.correspondList;
 	}
 
-	public void findMorphingPoints(int numOfStages){
-		
+	public LinkedHashMap<Integer, ArrayList<Point<Integer>>> findMorphingPoints(int numOfStages){
+		int num = 1;
+		for (Map.Entry<Point<Integer>, Point<Integer>> entry: correspondList.entrySet()){
+			Point<Float> unitVec = Utils.getUnitVector(((Point<Integer>)entry.getKey()).x, 
+											((Point<Integer>)entry.getKey()).y, 
+											((Point<Integer>)entry.getValue()).x,
+											((Point<Integer>)entry.getValue()).y);
+			int dist = Utils.getDistance(((Point<Integer>)entry.getKey()).x, 
+											((Point<Integer>)entry.getKey()).y, 
+											((Point<Integer>)entry.getValue()).x,
+											((Point<Integer>)entry.getValue()).y);
+			ArrayList<Point<Integer>> actPoints = new ArrayList<>();
+			for (int i=0; i < numOfStages; i++){
+				Point<Integer> point = new Point(0, 0);
+				point.x = entry.getKey().x + Math.round(unitVec.x * (i/numOfStages) * dist);
+				point.y = entry.getKey().y + Math.round(unitVec.y * (i/numOfStages) * dist);
+				actPoints.add(point);
+			} 
+			morphPoints.put(num, actPoints);
+			num++;
+		}
+		return this.morphPoints;
 	}
 }

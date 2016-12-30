@@ -1,5 +1,6 @@
 
 import java.awt.*;
+import java.util.Random;
 class Utils{
 	
 
@@ -89,19 +90,43 @@ class Utils{
 		return new Point<Integer>(Math.round(newX), Math.round(newY));
 	}
 
-	private static double getPointAngleWithXAxis(Point<Integer> firstPoint, Point<Integer> refPoint, int orientation){
-		double result = 0.0;
-		if (orientation == -1){		// this is CCW
-			result = Math.atan2(firstPoint.y - refPoint.y, firstPoint.x - refPoint.x);
-		} else if (orientation == 1){	// this is CW
-			result = Math.atan2(firstPoint.x - refPoint.x, firstPoint.y - refPoint.y);
-		}
-
-		double angle = Math.toDegrees(result);
+	
+	public static double getPointAngleWithXAxis(Point<Integer> firstPoint, Point<Integer> secondPoint){
+	
+		double angleRad = Math.atan2(firstPoint.y, firstPoint.x) - Math.atan2(secondPoint.y, secondPoint.y);
+		double angle = Math.toDegrees(angleRad);
 
 		if (angle < 0){
 			angle += 360;
 		}
+
 		return angle;
 	}
+
+	public static Color generateRandomColour(){
+
+		// Referenced from http://stackoverflow.com/questions/4246351/creating-random-colour-in-java
+		Random random = new Random();
+		final float hue = random.nextFloat();
+		final float saturation = 0.9f;//1.0 for brilliant, 0.0 for dull
+		final float luminance = 1.0f; //1.0 for brighter, 0.0 for black
+		return (Color.getHSBColor(hue, saturation, luminance));
+
+	}
+
+	/*	
+	public static double getAngleOfPointWithXAxis(Point<Integer> firstPoint, Point<Integer> refPoint){
+		double result = 0.0;
+		int diffX1 = firstPoint.x - refPoint.x;
+		int diffY1 = firstPoint.y - refPoint.y;
+		double denom = Math.sqrt(diffX1 * diffX1 + diffY1 * diffY1);
+		result = Math.asin((double)(refPoint.y - firstPoint.y) / denom);
+		double angle = Math.toDegrees(result);
+
+		if (angle < 0){
+			angle = 360 - Math.abs(angle);
+		}
+
+		return angle;
+	}*/
 }

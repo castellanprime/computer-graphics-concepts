@@ -12,10 +12,19 @@ public class Morphing extends Frame{
 	public JLabel statusLabel = new JLabel();
 
 	public static void main(String[] args) {
-		new Morphing();
+		if (args.length != 1){
+			System.out.println("Usage: java Morphing <num of stages:Stages should be between 1 and 6>");
+			System.exit(1);
+		}
+
+		int st = Integer.parseInt(args[0]);
+		if (st <= 1 || st >= 6){
+			st = 3;
+		}
+		new Morphing(st);
 	}
 
-	Morphing() {
+	Morphing(int stages) {
 		super("Polygon Morphing");
 		addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
@@ -25,7 +34,7 @@ public class Morphing extends Frame{
 		setSize(700, 600);
 		setResizable(false);
 		add("North", statusLabel);
-		add("Center", new PolygonMorph(statusLabel));
+		add("Center", new PolygonMorph(statusLabel, stages));
 		setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
 		setVisible(true);
 	}
@@ -47,15 +56,21 @@ class PolygonMorph extends Canvas{
 	//private ArrayList<Line2D> sourcePolyLines = new ArrayList<>();
 	//private ArrayList<Line2D> targetPolyLines = new ArrayList<>();
 
+	LinkedHashMap<Point<Integer> , Point<Integer>> corresList =  new LinkedHashMap<>();
+	LinkedHashMap<Integer, ArrayList<Point<Integer>>> morphList = new LinkedHashMap();
+
 	private int polyOrientation;
 
 	private Point<Integer> currentPoint;
 
 	private JLabel status;
+	private int numOfStages;
+	private int counter = 1;
 
-	PolygonMorph(JLabel statusLabel){
+	PolygonMorph(JLabel statusLabel, int numOfStages){
 		super();
 		status = statusLabel;
+		this.numOfStages = numOfStages;
 		addMouseListener(new MouseAdapter(){
 			public void mousePressed(MouseEvent mt){
 				int x_coord = mt.getX();
@@ -124,8 +139,12 @@ class PolygonMorph extends Canvas{
 							System.out.println("Ignore the point clicked");
 						}
 					}
-				} else if (morphBegin == false && isSourcePolyComplete == true && isTargetPolyComplete == true){
-
+				} else if (morphBegin == true){
+					if (counter < numOfStages){
+						counter++;
+					}else if (counter >= numOfStages){
+						counter = 1;
+					}
 				}
 				repaint();
 			}
@@ -183,8 +202,10 @@ class PolygonMorph extends Canvas{
 
 		// Draw sourcePolygon
 		if (sourcePolyPoints.isEmpty()) return;
-		drawUserPolygon(g, sourcePolyPoints, isSourcePolyComplete, Color.magenta);
-		drawUserGuideLines(g, sourcePolyPoints, isSourcePolyComplete, sourcePolyCenter);
+		if (morphBegin == false){
+			drawUserPolygon(g, sourcePolyPoints, isSourcePolyComplete, Color.magenta);
+			drawUserGuideLines(g, sourcePolyPoints, isSourcePolyComplete, sourcePolyCenter);
+		}
 
 		if (targetPolyCenter != null){
 			Utils.markPoint(g, targetPolyCenter, 2);
@@ -194,8 +215,8 @@ class PolygonMorph extends Canvas{
 		if (targetPolyPoints.isEmpty()) return;
 		if (hasTranslated == false){
 			drawUserPolygon(g, targetPolyPoints, isTargetPolyComplete, Color.magenta);
+			drawUserGuideLines(g, targetPolyPoints, isTargetPolyComplete, targetPolyCenter);
 		}
-		drawUserGuideLines(g, targetPolyPoints, isTargetPolyComplete, targetPolyCenter);
 
 		if (isSourcePolyComplete == true && isTargetPolyComplete == true){
 			status.setText("Polygons drawn");
@@ -219,41 +240,105 @@ class PolygonMorph extends Canvas{
 			drawUserPolygon(g, targetPolyPoints, isTargetPolyComplete, Color.blue);
 			status.setText("Target polyon has translated and is shown in blue");
 
-			// Sort the points in the polygon
-			Point<Integer> refpoint = new Point<Integer>(sourcePolyCenter.x + 20, sourcePolyCenter.y);
-
-			SortedMap<Double, Point<Integer>> sourceAnglePoints = new TreeMap<>();
-			SortedMap<Double, Point<Integer>> targetAnglePoints = new TreeMap<>();
+			System.out.print("Source PolyPoints:");
+			System.out.println("\n");
 
 			for (Point<Integer> point: sourcePolyPoints){
-				double angle = Utils.getPointAngleWithXAxis(point, refpoint, polyOrientation);
-				sourceAnglePoints.put(angle, point);
+				System.out.println("Point: " + point);
 			}
+
+			System.out.println("\n");
+			System.out.print("Target PolyPoints:");
+			System.out.println("\n\n");
 
 			for (Point<Integer> point: targetPolyPoints){
-				double angle = Utils.getPointAngleWithXAxis(point, refpoint, polyOrientation);
-				targetAnglePoints.put(angle, point);
-			}			
+				System.out.println("Point: " + point);
+			}	
 
-			ArrayList<Point<Integer>> sortedSourcePolyPoints = new ArrayList<>();
-			ArrayList<Point<Integer>> sortedTargetPolyPoints = new ArrayList<>();
+			System.out.println("PolyOrientation" + polyOrientation);
 
-			for (Map.Entry<Double, Point<Integer>> entry: sourceAnglePoints.entrySet()){
-				sortedSourcePolyPoints.add(entry.getValue());
+			// Sort the points in the polygon
+			if (morphBegin == false){
+				status.setText("Computing corresponding points");
+				Point<Integer> refpoint = new Point<Integer>(sourcePolyCenter.x + 20, sourcePolyCenter.y);
+
+				SortedMap<Double, Point<Integer>> sourceAnglePoints = new TreeMap<>();
+				SortedMap<Double, Point<Integer>> targetAnglePoints = new TreeMap<>();
+
+				for (Point<Integer> point: sourcePolyPoints){
+					double angle = Utils.getAngleBtwVectors(sourcePolyCenter, refpoint, point);
+					//double angle = Utils.getAngleFromPoint(point, refpoint);
+					sourceAnglePoints.put(angle, point);
+				}
+
+				for (Point<Integer> point: targetPolyPoints){
+					double angle = Utils.getAngleBtwVectors(sourcePolyCenter, refpoint, point);
+					//double angle = Utils.getAngleFromPoint(point, refpoint);
+					targetAnglePoints.put(angle, point);
+				}			
+
+				// Print sortedPoints
+				for (Map.Entry<Double, Point<Integer>> en: sourceAnglePoints.entrySet()){
+					System.out.println("Angle: " + en.getKey() + " Point: " + en.getValue());
+				}
+
+				System.out.println("\n\n");
+
+				for (Map.Entry<Double, Point<Integer>> en: targetAnglePoints.entrySet()){
+					System.out.println("Angle: " + en.getKey() + " Point: " + en.getValue());
+				}
+
+				//System.out.println("\n\n");
+
+				/*
+				ArrayList<Point<Integer>> sortedSourcePolyPoints = new ArrayList<>();
+				ArrayList<Point<Integer>> sortedTargetPolyPoints = new ArrayList<>();
+
+				for (Map.Entry<Double, Point<Integer>> entry: sourceAnglePoints.entrySet()){
+					sortedSourcePolyPoints.add(entry.getValue());
+				}
+
+				for (Map.Entry<Double, Point<Integer>> entry: targetAnglePoints.entrySet()){
+					sortedTargetPolyPoints.add(entry.getValue());
+				}
+
+				// Find the corresponding points
+				CorrPoints corrPoints = new CorrPoints(sortedSourcePolyPoints, 
+													   sortedTargetPolyPoints,
+													   sourcePolyCenter,
+													   targetPolyCenter);
+
+				corresList = corrPoints.findCorrespondingPoints();
+				for (Map.Entry<Point<Integer>, Point<Integer>> en: corresList.entrySet()){
+					System.out.println("FirstPoint: " + en.getKey() + " SecondPoint: " + en.getValue());
+				}
+				//morphList = corrPoints.findMorphingPoints(numOfStages);
+				//morphBegin = true;
+				*/
 			}
 
-			for (Map.Entry<Double, Point<Integer>> entry: targetAnglePoints.entrySet()){
-				sortedTargetPolyPoints.add(entry.getValue());
+			// Draw points and polygons
+			if (morphBegin == true){
+				status.setText("Drawing lines between corresponding points");
+				for (Map.Entry<Point<Integer>, Point<Integer>> entry: corresList.entrySet()){
+					Utils.markPoint(g, entry.getKey(), 3);
+					Utils.markPoint(g, entry.getValue(), 3);
+					g.setColor(new Color(67, 186, 216));
+					g.drawLine(entry.getKey().x, entry.getKey().y, entry.getValue().x, entry.getValue().y);  
+				}
+
+				status.setText("Morphing the source Polygon");
+				g.setColor(Color.BLACK);
+				ArrayList<Point<Integer>> morphedPolygon = new ArrayList<>();
+				for (ArrayList<Point<Integer>> list: morphList.values()){
+					for (Point<Integer> point: list){
+						Utils.markPoint(g, point, 3);
+					}
+					morphedPolygon.add(list.get(counter - 1));
+				}
+				drawUserPolygon(g, morphedPolygon, true, new Color(153, 107, 196));	// Light purple
+				status.setText("Drawing stage " + counter + " of " + numOfStages + " stages");
 			}
-
-			// Find the corresponding points
-			CorrPoints corrPoints = new CorrPoints(sortedSourcePolyPoints, 
-												   sortedTargetPolyPoints,
-												   sourcePolyCenter,
-												   targetPolyCenter);
-
-
-
 		}
 
 	}
