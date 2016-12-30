@@ -38,8 +38,8 @@ class PythagoreanTree extends Frame{
 
 	public String drawModeOne = "DFS", drawModeTwo = "BFS"; 
 	private Button b;
-	private int limit_DFS, limit_BFS;
-
+	public int limit_DFS, limit_BFS;
+	public int width = 600, height = 400;
 
 	PythagoreanTree(int limit_DFS, int limit_BFS){
 		super("PythagoreanTree");
@@ -53,8 +53,8 @@ class PythagoreanTree extends Frame{
 
 		setLayout(new BorderLayout());
 
-		PythDisplay display = new PythDisplay(drawModeOne, limit_DFS);
-		PythDisplay new_display = new PythDisplay(drawModeTwo, limit_BFS);
+		PythDisplay display = new PythDisplay(drawModeOne, limit_DFS, width, height);
+		PythDisplay new_display = new PythDisplay(drawModeTwo, limit_BFS, width, height);
 
 		add("Center", display);
 
@@ -80,7 +80,7 @@ class PythagoreanTree extends Frame{
 				}
 			}
 		});
-		setSize(600, 400);
+		setSize(width, height);
 		add("North", b);
 		setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
 		setVisible(true);
@@ -108,23 +108,23 @@ class PythagoreanTree extends Frame{
 class PythDisplay extends Canvas{
 
 	private String displayMode;
-	private int limit;
+	private int limit, width, height;
 	private ArrayList<Point<Integer>> arr = new ArrayList<>();
 	private ArrayList<Point<Integer>> new_arr = new ArrayList<>();
 
-	PythDisplay(String displayMode, int limit){
+	PythDisplay(String displayMode, int limit, int width, int height){
 		this.displayMode = displayMode;
 		this.limit = limit;
+		this.width = width;
+		this.height = height;
 		addMouseListener(new MouseAdapter(){
 			public void mouseClicked(MouseEvent evt){
 				int xCoord = evt.getX();
 				int yCoord = evt.getY();
 				if (displayMode.equalsIgnoreCase("DFS")){
 					arr.add(new Point<Integer>(xCoord, yCoord));
-					System.out.println(arr.get(0).x + " " + arr.get(0).y);
 				} else if (displayMode.equalsIgnoreCase("BFS")){
 					new_arr.add(new Point<Integer>(xCoord, yCoord));
-					System.out.println(new_arr.get(0).x + " " + new_arr.get(0).y);
 				}
 				repaint();
 			}
@@ -182,8 +182,14 @@ class PythDisplay extends Canvas{
 		g.fillPolygon(rect);
 		g.setColor(Color.BLACK);
 
+		Dimension d = getSize();
+		int sleepTime = 400;
+		if (width < d.width && height < d.height){
+			sleepTime = 100;
+		}
+
 		try{
-			Thread.sleep(500);
+			Thread.sleep(sleepTime);
 		} catch(InterruptedException ex){
 			ex.printStackTrace();
 		}
@@ -205,8 +211,6 @@ class PythDisplay extends Canvas{
 	public void drawTree(Graphics g, Point<Integer> firstPoint, Point<Integer> secondPoint, int limit){
 
 		if (limit < getDistance(firstPoint, secondPoint)){
-			System.out.println(firstPoint.x + " " + firstPoint.y + "  " + secondPoint.x + " " + secondPoint.y 
-					+ "    Distance" + getDistance(firstPoint, secondPoint));
 			ArrayList<Point<Integer>> draw_arr = computeSquarePoints(firstPoint, secondPoint);
 			Point<Integer> triangleVertex = computeVertex(draw_arr.get(0), draw_arr.get(1));
 			drawPentagon(g, firstPoint, secondPoint, draw_arr, triangleVertex);
@@ -223,9 +227,6 @@ class PythDisplay extends Canvas{
 		lines.add(new ArrayList<Point<Integer>>(Arrays.asList(firstPoint, secondPoint)));
 		while(limit < getDistance(((ArrayList<Point<Integer>>)lines.peek()).get(0), ((ArrayList<Point<Integer>>)lines.peek()).get(1))){
 			ArrayList<Point<Integer>> li = (ArrayList<Point<Integer>>)lines.poll();
-			System.out.println(li.get(0).x + " " + li.get(0).y + "  " + 
-					li.get(1).x + " " + li.get(1).y 
-					+ "    Distance" + getDistance(li.get(0), li.get(1)));
 			ArrayList<Point<Integer>> draw_arr = computeSquarePoints(li.get(0), li.get(1));
 			Point<Integer> triangleVertex = computeVertex(draw_arr.get(0), draw_arr.get(1));
 			drawPentagon(g, li.get(0), li.get(1), draw_arr, triangleVertex);
