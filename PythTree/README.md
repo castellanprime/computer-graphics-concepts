@@ -6,9 +6,9 @@ This is a way to draw a tree with branches using pentagons and triangles.
 
 To run, 
 
-> java -jar pythee jar <limit-DFS> <limit-BFS>
+> java -jar pythtree.jar limit-DFS limit-BFS
 
-where limit-BFS must be integers.
+where limit-BFS  and limit-DFS must be integers.
 
 ### Output 
 
