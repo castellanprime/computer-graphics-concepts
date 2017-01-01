@@ -1,0 +1,117 @@
+#wrapper{
+  display: -webkit-box;
+  display: -moz-box;
+  display: -ms-flexbox;
+  display: -webkit-flex;
+  display: flex;  
+  
+  -ms-flex-flow: column;
+  -webkit-flex-flow: column;
+  flex-flow: column;
+  
+  text-align: center;
+
+  width:100%;
+  height:100%;
+  justify-content: flex-start; /* align items in Main Axis */
+  align-items: stretch; /* align items in Cross Axis */
+  align-content: stretch; 
+}
+
+
+#mainContent, #instructions, #navLinks, aside, article, canvas{
+	border:1px solid #191a1c;
+}
+
+#wrapper > *, #mainContent > *, aside > *{
+	margin:5px;
+}
+
+#mainNav{
+	height:5%;
+}
+
+#mainNav ul{
+	display: -webkit-inline-box;
+  	display: -moz-inline-box;
+  	display: -ms-inline-flexbox;
+  	display: -webkit-inline-flex;
+	display: inline-flex;
+	
+	-ms-flex-flow: row nowrap;
+	-webkit-flex-flow: row nowrap;
+	flex-flow: row nowrap;
+
+	-webkit-justify-content: center; 
+	justify-content: center;
+}
+
+#mainNav li{
+	background: #e81431;
+	list-style-type: none;
+	margin-left:10px;
+	margin-right:10px;
+	margin-top:5px;
+	margin-bottom:5px;
+	padding:0;
+	font-size: 1.5em;
+	color:white;
+	font-weight: bold;
+}
+
+#mainNav li a:link{
+	text-decoration: none;
+}
+
+#mainNav li a:hover{
+	background:#ef9ea9;
+}
+
+#mainContent{
+  display: -webkit-box;
+  display: -moz-box;
+  display: -ms-flexbox;
+  display: -webkit-flex;
+  display: flex;  
+  
+  -ms-flex-flow: row nowrap;
+  -webkit-flex-flow: row nowrap;
+  flex-flow: row nowrap;
+
+  align-content: stretch;
+  align-items: stretch;
+}
+
+aside{
+	background:#dddddd;
+	flex:1 30%;
+
+	display: -webkit-box;
+	display: -moz-box;
+	display: -ms-flexbox;
+	display: -webkit-flex;
+	display: flex;  
+	  
+	-ms-flex-flow: column;
+	-webkit-flex-flow: column;
+	flex-flow: column;
+	  
+	text-align: center;
+	justify-content: flex-start; /* align items in Main Axis */
+	align-items: stretch; /* align items in Cross Axis */
+	align-content: stretch; 
+}
+
+article{
+	flex:3 60%;
+}
+
+canvas{
+	width:100%;
+	height:100%;
+}
+
+#instructions, #navLinks{
+	flex:1 45%;
+}
+
