@@ -23,7 +23,7 @@
 	border:1px solid #191a1c;
 }
 
-#wrapper > *, #mainContent > *, aside > *{
+#wrapper > *, #mainContent > *, aside > *, #navlinks > *{
 	margin:5px;
 }
 
@@ -115,3 +115,23 @@ canvas{
 	flex:1 45%;
 }
 
+#navlinks a:hover{
+	background:#8db5f4;
+}
+
+.links{
+	text-decoration:none;
+	background:#0260f7;
+	font-size:1.5em;
+	color:white;
+	padding:0;
+	margin-top:10px;
+	margin-bottom:10px;
+	margin-left:10px;
+	margin-right:10px;
+	display:block;
+}
+
+.instructStyle{
+	background:#8db5f4;
+}
